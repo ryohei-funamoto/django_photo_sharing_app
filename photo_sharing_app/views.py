@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from .models import Post
 
 # Create your views here.
@@ -12,5 +12,18 @@ def index(request):
     return render(
         request,
         'photo_sharing_app/index.html',
+        context=context,
+    )
+
+def show(request, id):
+    post = get_object_or_404(Post, pk=id)
+
+    context = {
+        'post': post,
+    }
+
+    return render(
+        request,
+        'photo_sharing_app/detail.html',
         context=context,
     )

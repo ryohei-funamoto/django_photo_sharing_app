@@ -5,4 +5,5 @@ app_name = 'photo_sharing_app'
 
 urlpatterns = [
     path('', views.index, name='index'),
+    path('posts/<int:id>/', views.show, name='show'),
 ]

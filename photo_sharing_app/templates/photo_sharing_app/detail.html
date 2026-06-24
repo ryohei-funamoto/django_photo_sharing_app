@@ -1,0 +1,12 @@
+{% extends 'photo_sharing_app/layouts/base.html' %}
+{% block title %}{{ post.title }} | {{ block.super }}{% endblock %}
+{% block content %}
+    <h1>{{ post.title }}</h1>
+    <p>{{ post.content | linebreaksbr }}</p>
+    <p>投稿者: {{ post.posted_by }}</p>
+    <p><time datetime="{{ post.created_at | date:'Y-m-d' }}">投稿日: {{ post.created_at | date:'Y/m/d' }}</time></p>
+    <p><time datetime="{{ post.updated_at | date:'Y-m-d' }}">更新日: {{ post.updated_at | date:'Y/m/d' }}</time></p>
+    <ul>
+        <li><a href="{% url 'photo_sharing_app:index' %}">トップへ戻る</a></li>
+    </ul>
+{% endblock %}
