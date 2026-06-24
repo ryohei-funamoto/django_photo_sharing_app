@@ -6,4 +6,7 @@
     <p>投稿者: {{ post.posted_by }}</p>
     <p><time datetime="{{ post.created_at | date:'Y-m-d' }}">投稿日: {{ post.created_at | date:'Y/m/d' }}</time></p>
     <p><time datetime="{{ post.updated_at | date:'Y-m-d' }}">更新日: {{ post.updated_at | date:'Y/m/d' }}</time></p>
+    <ul>
+        <li><a href="{% url 'photo_sharing_app:index' %}">トップへ戻る</a></li>
+    </ul>
 {% endblock %}
