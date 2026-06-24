@@ -2,7 +2,7 @@
 {% block content %}
     <div class="posts">
         {% for post in posts %}
-            <a href="#" class="post">
+            <a href="{% url 'photo_sharing_app:show' id=post.id %}" class="post">
                 <p>{{ post.title }}</p>
                 <p>{{ post.content | truncatechars:50 }}</p>
                 <p>投稿者: {{ post.posted_by }}</p>
