@@ -7,6 +7,7 @@ app_name = 'photo_sharing_app'
 urlpatterns = [
     path('', views.index, name='index'),
     path('posts/<int:id>/', views.show, name='show'),
+    path('posts/create/', views.create, name='create'),
     path('accounts/login/',
          auth_views.LoginView.as_view(
              redirect_authenticated_user=True,
