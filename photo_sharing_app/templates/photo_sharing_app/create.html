@@ -1,0 +1,25 @@
+{% extends 'photo_sharing_app/layouts/base.html' %}
+{% block title %}投稿作成ページ | {{ block.super }}{% endblock %}
+{% block content %}
+    <h1>投稿作成ページ</h1>
+    <form action="{% url 'photo_sharing_app:create' %}" method="POST" novalidate>
+        {% csrf_token %}
+        {% for field in form %}
+            <div>
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    {% for error in field.errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        {% endfor %}
+        <div>
+            <button type="submit">投稿する</button>
+        </div>
+    </form>
+    <ul>
+        <li><a href="{% url 'photo_sharing_app:index' %}">トップへ戻る</a></li>
+    </ul>
+{% endblock %}
