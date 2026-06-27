@@ -8,6 +8,16 @@
 <body>
     <header>
         <h1>Photo Sharing App</h1>
+        {% if request.user.is_authenticated %}
+            <p>ようこそ、 {{ request.user }} さん</p>
+            <form action="{% url 'photo_sharing_app:logout' %}" method="POST">
+                {% csrf_token %}
+                <button type="submit">ログアウトする</button>
+            </form>
+        {% elif request.resolver_match.url_name == 'login' %}
+        {% else %}
+            <p><a href="{% url 'photo_sharing_app:login' %}?next={{ request.get_full_path | urlencode  }}">ログインする</a></p>
+        {% endif %}
     </header>
     {% block content %}{% endblock %}
     <footer>
