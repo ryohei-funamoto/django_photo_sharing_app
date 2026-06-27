@@ -104,6 +104,12 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+# 認証リダイレクト設定
+LOGIN_URL = 'photo_sharing_app:login' # LOGIN が必要なビューにアクセスがあった場合の遷移先
+LOGIN_REDIRECT_URL = 'photo_sharing_app:index' # LOGIN 後のリダイレクト先
+LOGOUT_REDIRECT_URL = 'photo_sharing_app:login' # LOGOUT 後のリダイレクト先
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
