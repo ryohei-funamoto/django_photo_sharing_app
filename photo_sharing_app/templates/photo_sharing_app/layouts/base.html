@@ -10,6 +10,7 @@
         <h1>Photo Sharing App</h1>
         {% if request.user.is_authenticated %}
             <p>ようこそ、 {{ request.user }} さん</p>
+            <p><a href="{% url 'photo_sharing_app:create' %}">投稿する</a></p>
             <form action="{% url 'photo_sharing_app:logout' %}" method="POST">
                 {% csrf_token %}
                 <button type="submit">ログアウトする</button>
