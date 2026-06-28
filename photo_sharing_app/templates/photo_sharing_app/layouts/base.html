@@ -7,7 +7,11 @@
 </head>
 <body>
     <header>
-        <h1>Photo Sharing App</h1>
+        {% if request.resolver_match.url_name == 'index' %}
+            <h1>Photo Sharing App</h1>
+        {% else %}
+            <p><a href="{% url 'photo_sharing_app:index' %}">Photo Sharing App</a></p>
+        {% endif %}
         {% if request.user.is_authenticated %}
             <p>ようこそ、 {{ request.user }} さん</p>
             <p><a href="{% url 'photo_sharing_app:create' %}">投稿する</a></p>
