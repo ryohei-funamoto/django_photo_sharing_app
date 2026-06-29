@@ -52,3 +52,35 @@ class IndexViewWithoutPostsTestCase(TestCase):
     def test_index_displays_empty_message_when_no_posts(self):
         response = self.client.get(reverse('photo_sharing_app:index'))
         self.assertContains(response, 'まだ投稿がありません。')
+
+class ShowViewTestCase(TestCase):
+    def setUp(self):
+        self.posted_by = User.objects.create_user(
+            username='testuser',
+            password='testpasswd'
+        )
+
+        self.post = Post.objects.create(
+            posted_by=self.posted_by,
+            title='タイトル',
+            content='本文1\n本文2'
+        )
+
+    def test_show_returns_200(self):
+        response = self.client.get(reverse('photo_sharing_app:show', kwargs={'id': self.post.id}))
+        self.assertEqual(response.status_code, 200)
+
+    def test_show_uses_detail_template(self):
+        response = self.client.get(reverse('photo_sharing_app:show', kwargs={'id': self.post.id}))
+        self.assertTemplateUsed(response, 'photo_sharing_app/detail.html')
+
+    def test_show_returns_404_for_nonexistent_post(self):
+        response = self.client.get(reverse('photo_sharing_app:show', kwargs={'id': self.post.id + 1}))
+        self.assertEqual(response.status_code, 404)
+
+    def test_show_displays_post_detail(self):
+        response = self.client.get(reverse('photo_sharing_app:show', kwargs={'id': self.post.id}))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['post'], self.post)
+        self.assertContains(response, 'タイトル')
+        self.assertContains(response, '本文1<br>本文2', html=True)
