@@ -1,4 +1,5 @@
 from datetime import timedelta
+from urllib.parse import urlencode
 
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -84,3 +85,58 @@ class ShowViewTestCase(TestCase):
         self.assertEqual(response.context['post'], self.post)
         self.assertContains(response, 'タイトル')
         self.assertContains(response, '本文1<br>本文2', html=True)
+
+class CreateViewTestCase(TestCase):
+    def setUp(self):
+        self.posted_by = User.objects.create_user(
+            username='testuser',
+            password='testpasswd'
+        )
+        self.create_url = reverse('photo_sharing_app:create')
+        self.login_url = reverse('photo_sharing_app:login')
+        self.redirect_url = f'{self.login_url}?{urlencode({"next": self.create_url})}'
+
+    def test_create_redirects_to_login_when_anonymous_get(self):
+        response = self.client.get(self.create_url)
+        self.assertRedirects(response, self.redirect_url)
+
+    def test_create_redirects_to_login_when_anonymous_post(self):
+        response = self.client.post(self.create_url, {
+            'title': 'タイトル',
+            'content': '本文',
+        })
+        self.assertEqual(Post.objects.count(), 0)
+        self.assertRedirects(response, self.redirect_url)
+
+    def test_create_returns_200_when_authenticated(self):
+        self.client.login(username='testuser', password='testpasswd')
+        response = self.client.get(self.create_url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_create_uses_create_template_when_authenticated(self):
+        self.client.login(username='testuser', password='testpasswd')
+        response = self.client.get(self.create_url)
+        self.assertTemplateUsed(response, 'photo_sharing_app/create.html')
+
+    def test_create_creates_post_when_authenticated(self):
+        self.client.login(username='testuser', password='testpasswd')
+        response = self.client.post(self.create_url, {
+            'title': 'タイトル',
+            'content': '本文',
+        })
+        self.assertEqual(Post.objects.count(), 1)
+        post = Post.objects.first()
+        self.assertEqual(post.posted_by, self.posted_by)
+        self.assertEqual(post.title, 'タイトル')
+        self.assertEqual(post.content, '本文')
+        self.assertRedirects(response, reverse('photo_sharing_app:index'))
+
+    def test_create_renders_form_with_errors_when_input_is_empty(self):
+        self.client.login(username='testuser', password='testpasswd')
+        response = self.client.post(self.create_url, {
+            'title': '',
+            'content': '',
+        })
+        self.assertEqual(Post.objects.count(), 0)
+        self.assertContains(response, 'タイトルを入力してください。')
+        self.assertContains(response, '本文を入力してください。')
