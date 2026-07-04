@@ -1,6 +1,7 @@
 from datetime import timedelta
 from urllib.parse import urlencode
 
+from django.contrib.auth import get_user
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
@@ -140,3 +141,57 @@ class CreateViewTestCase(TestCase):
         self.assertEqual(Post.objects.count(), 0)
         self.assertContains(response, 'タイトルを入力してください。')
         self.assertContains(response, '本文を入力してください。')
+
+class LoginViewTestCase(TestCase):
+    def setUp(self):
+        self.posted_by = User.objects.create_user(
+            username='testuser',
+            password='testpasswd'
+        )
+        self.login_url = reverse('photo_sharing_app:login')
+        self.index_url = reverse('photo_sharing_app:index')
+        self.create_url = reverse('photo_sharing_app:create')
+
+    def test_login_returns_200(self):
+        response = self.client.get(self.login_url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_login_uses_login_template(self):
+        response = self.client.get(self.login_url)
+        self.assertTemplateUsed(response, 'photo_sharing_app/registration/login.html')
+
+    def test_login_logs_in_successfully_with_valid_credentials(self):
+        response = self.client.post(self.login_url, {
+            'username': 'testuser',
+            'password': 'testpasswd',
+        })
+        user = get_user(self.client)
+        self.assertTrue(user.is_authenticated)
+        self.assertEqual(user.username, 'testuser')
+        self.assertRedirects(response, self.index_url)
+
+    def test_login_does_not_authenticate_with_wrong_password(self):
+        response = self.client.post(self.login_url, {
+            'username': 'testuser',
+            'password': 'wrongpasswd',
+        })
+        user = get_user(self.client)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['form'].errors)
+        self.assertFalse(user.is_authenticated)
+
+    def test_login_redirects_to_create_with_next_parameter(self):
+        url_parameter = urlencode({'next': self.create_url})
+        response = self.client.post(f'{self.login_url}?{url_parameter}', {
+            'username': 'testuser',
+            'password': 'testpasswd',
+        })
+        user = get_user(self.client)
+        self.assertTrue(user.is_authenticated)
+        self.assertEqual(user.username, 'testuser')
+        self.assertRedirects(response, self.create_url)
+
+    def test_login_redirects_authenticated_user_to_index(self):
+        self.client.force_login(self.posted_by)
+        response = self.client.get(self.login_url)
+        self.assertRedirects(response, self.index_url)
