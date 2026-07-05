@@ -195,3 +195,19 @@ class LoginViewTestCase(TestCase):
         self.client.force_login(self.posted_by)
         response = self.client.get(self.login_url)
         self.assertRedirects(response, self.index_url)
+
+class LogoutViewTestCase(TestCase):
+    def setUp(self):
+        self.posted_by = User.objects.create_user(
+            username='testuser',
+            password='testpasswd'
+        )
+
+    def test_logout_redirects_to_login(self):
+        self.client.login(username='testuser', password='testpasswd')
+        user = get_user(self.client)
+        self.assertTrue(user.is_authenticated)
+        response = self.client.post(reverse('photo_sharing_app:logout'))
+        user = get_user(self.client)
+        self.assertFalse(user.is_authenticated)
+        self.assertRedirects(response, reverse('photo_sharing_app:login'))
