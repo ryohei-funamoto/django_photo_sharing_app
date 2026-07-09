@@ -8,6 +8,7 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('posts/<int:id>/', views.show, name='show'),
     path('posts/create/', views.create, name='create'),
+    path('posts/<int:id>/edit/', views.edit, name='edit'),
     path('accounts/login/',
          auth_views.LoginView.as_view(
              redirect_authenticated_user=True,

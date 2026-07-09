@@ -142,6 +142,114 @@ class CreateViewTestCase(TestCase):
         self.assertContains(response, 'タイトルを入力してください。')
         self.assertContains(response, '本文を入力してください。')
 
+class EditViewTestCase(TestCase):
+    def setUp(self):
+        self.posted_by1 = User.objects.create_user(
+            username='testuser1',
+            password='testpasswd1'
+        )
+        self.posted_by2 = User.objects.create_user(
+            username='testuser2',
+            password='testpasswd2'
+        )
+        self.post = Post.objects.create(
+            posted_by=self.posted_by1,
+            title='タイトル',
+            content='本文1\n本文2'
+        )
+        self.edit_url = reverse('photo_sharing_app:edit', kwargs={'id': self.post.id})
+        self.redirect_url = f'{reverse("photo_sharing_app:login")}?{urlencode({"next": self.edit_url})}'
+
+    def test_edit_redirects_to_login_when_anonymous_get(self):
+        response = self.client.get(self.edit_url)
+        self.assertRedirects(response, self.redirect_url)
+
+    def test_edit_redirects_to_login_when_anonymous_post(self):
+        response = self.client.post(self.edit_url, {
+            'title': 'タイトル改',
+            'content': '本文1改\n本文2改',
+        })
+        self.post.refresh_from_db()
+        self.assertEqual(Post.objects.count(), 1)
+        self.assertNotEqual(self.post.title, 'タイトル改')
+        self.assertNotEqual(self.post.content, '本文1改\n本文2改')
+        self.assertEqual(self.post.title, 'タイトル')
+        self.assertEqual(self.post.content, '本文1\n本文2')
+        self.assertRedirects(response, self.redirect_url)
+
+    def test_edit_returns_200_when_authenticated(self):
+        self.client.login(username='testuser1', password='testpasswd1')
+        response = self.client.get(self.edit_url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_edit_uses_edit_template_when_authenticated(self):
+        self.client.login(username='testuser1', password='testpasswd1')
+        response = self.client.get(self.edit_url)
+        self.assertTemplateUsed(response, 'photo_sharing_app/edit.html')
+
+    def test_edit_edits_post_when_authenticated(self):
+        self.client.login(username='testuser1', password='testpasswd1')
+        response = self.client.post(self.edit_url, {
+            'title': 'タイトル改',
+            'content': '本文1改\n本文2改',
+        })
+        self.post.refresh_from_db()
+        self.assertEqual(Post.objects.count(), 1)
+        self.assertEqual(self.post.title, 'タイトル改')
+        self.assertEqual(self.post.content, '本文1改\n本文2改')
+        self.assertRedirects(response,
+                             reverse('photo_sharing_app:show', kwargs={'id': self.post.id}))
+
+    def test_edit_renders_form_with_errors_when_input_is_empty(self):
+        self.client.login(username='testuser1', password='testpasswd1')
+        response = self.client.post(self.edit_url, {
+            'title': '',
+            'content': '',
+        })
+        self.post.refresh_from_db()
+        self.assertEqual(Post.objects.count(), 1)
+        self.assertEqual(self.post.title, 'タイトル')
+        self.assertEqual(self.post.content, '本文1\n本文2')
+        self.assertContains(response, 'タイトルを入力してください。')
+        self.assertContains(response, '本文を入力してください。')
+
+    def test_edit_returns_403_when_another_user_gets_edit_page(self):
+        self.client.login(username='testuser2', password='testpasswd2')
+        response = self.client.get(self.edit_url)
+        self.assertEqual(response.status_code, 403)
+
+    def test_edit_returns_403_when_another_user_posts_to_edit(self):
+        self.client.login(username='testuser2', password='testpasswd2')
+        response = self.client.post(self.edit_url, {
+            'title': 'タイトル改',
+            'content': '本文1改\n本文2改',
+        })
+        self.post.refresh_from_db()
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(Post.objects.count(), 1)
+        self.assertNotEqual(self.post.title, 'タイトル改')
+        self.assertNotEqual(self.post.content, '本文1改\n本文2改')
+        self.assertEqual(self.post.title, 'タイトル')
+        self.assertEqual(self.post.content, '本文1\n本文2')
+
+    def test_edit_returns_404_for_nonexistent_post_get(self):
+        self.client.login(username='testuser1', password='testpasswd1')
+        nonexistent_post_id = self.post.id + 1
+        response = self.client.get(
+            reverse('photo_sharing_app:edit', kwargs={'id': nonexistent_post_id})
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_edit_returns_404_for_nonexistent_post_post(self):
+        self.client.login(username='testuser1', password='testpasswd1')
+        nonexistent_post_id = self.post.id + 1
+        response = self.client.post(
+            reverse('photo_sharing_app:edit', kwargs={'id': nonexistent_post_id}), {
+                'title': 'タイトル改',
+                'content': '本文1改\n本文2改',
+            })
+        self.assertEqual(response.status_code, 404)
+
 class LoginViewTestCase(TestCase):
     def setUp(self):
         self.posted_by = User.objects.create_user(

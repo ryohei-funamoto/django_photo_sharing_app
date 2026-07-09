@@ -1,5 +1,7 @@
-from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
+from django.shortcuts import render, get_object_or_404, redirect
+
 from .models import Post
 from .forms import PostForm
 
@@ -47,5 +49,29 @@ def create(request):
     return render(
         request,
         'photo_sharing_app/create.html',
+        context=context,
+    )
+
+@login_required
+def edit(request, id):
+    post = get_object_or_404(Post, pk=id)
+
+    form = PostForm(request.POST or None, instance=post)
+
+    if post.posted_by == request.user:
+        if request.method == 'POST' and form.is_valid():
+            form.save()
+            return redirect('photo_sharing_app:show', id=post.id)
+    else:
+        raise PermissionDenied
+
+    context = {
+        'post': post,
+        'form': form,
+    }
+
+    return render(
+        request,
+        'photo_sharing_app/edit.html',
         context=context,
     )
