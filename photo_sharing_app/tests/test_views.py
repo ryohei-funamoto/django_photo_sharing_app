@@ -250,6 +250,72 @@ class EditViewTestCase(TestCase):
             })
         self.assertEqual(response.status_code, 404)
 
+class DeleteViewTestCase(TestCase):
+    def setUp(self):
+        self.posted_by1 = User.objects.create_user(
+            username='testuser1',
+            password='testpasswd1'
+        )
+        self.posted_by2 = User.objects.create_user(
+            username='testuser2',
+            password='testpasswd2'
+        )
+        self.post = Post.objects.create(
+            posted_by=self.posted_by1,
+            title='タイトル',
+            content='本文1\n本文2'
+        )
+        self.delete_url = reverse('photo_sharing_app:delete', kwargs={'id': self.post.id})
+        self.redirect_url = f'{reverse("photo_sharing_app:login")}?{urlencode({"next": self.delete_url})}'
+
+    def test_delete_redirects_to_login_when_anonymous_get(self):
+        response = self.client.get(self.delete_url)
+        self.assertRedirects(response, self.redirect_url)
+
+    def test_delete_redirects_to_login_when_anonymous_post(self):
+        response = self.client.post(self.delete_url)
+        self.assertEqual(Post.objects.count(), 1)
+        self.assertRedirects(response, self.redirect_url)
+
+    def test_delete_does_not_delete_post_when_authenticated_get(self):
+        self.client.login(username='testuser1', password='testpasswd1')
+        response = self.client.get(self.delete_url)
+        self.assertEqual(Post.objects.count(), 1)
+        self.assertRedirects(response, reverse('photo_sharing_app:show', kwargs={'id': self.post.id}))
+
+    def test_delete_deletes_post_when_authenticated_post(self):
+        self.client.login(username='testuser1', password='testpasswd1')
+        response = self.client.post(self.delete_url)
+        self.assertEqual(Post.objects.count(), 0)
+        self.assertRedirects(response, reverse('photo_sharing_app:index'))
+
+    def test_delete_returns_403_when_another_user_gets_delete_url(self):
+        self.client.login(username='testuser2', password='testpasswd2')
+        response = self.client.get(self.delete_url)
+        self.assertEqual(response.status_code, 403)
+
+    def test_delete_returns_403_when_another_user_posts_to_delete(self):
+        self.client.login(username='testuser2', password='testpasswd2')
+        response = self.client.post(self.delete_url)
+        self.assertEqual(Post.objects.count(), 1)
+        self.assertEqual(response.status_code, 403)
+
+    def test_delete_returns_404_for_nonexistent_post_get(self):
+        self.client.login(username='testuser1', password='testpasswd1')
+        nonexistent_post_id = self.post.id + 1
+        response = self.client.get(
+            reverse('photo_sharing_app:delete', kwargs={'id': nonexistent_post_id})
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_delete_returns_404_for_nonexistent_post_post(self):
+        self.client.login(username='testuser1', password='testpasswd1')
+        nonexistent_post_id = self.post.id + 1
+        response = self.client.post(
+            reverse('photo_sharing_app:delete', kwargs={'id': nonexistent_post_id})
+        )
+        self.assertEqual(response.status_code, 404)
+
 class LoginViewTestCase(TestCase):
     def setUp(self):
         self.posted_by = User.objects.create_user(
