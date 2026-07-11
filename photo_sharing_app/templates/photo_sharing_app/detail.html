@@ -9,6 +9,12 @@
     {% if post.posted_by == request.user and request.user.is_authenticated %}
         <ul>
             <li><a href="{% url 'photo_sharing_app:edit' id=post.id %}">編集する</a></li>
+            <li>
+                <form action="{% url 'photo_sharing_app:delete' id=post.id %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" onclick="return confirm('削除しますか？')">削除する</button>
+                </form>
+            </li>
         </ul>
     {% endif %}
     <ul>
