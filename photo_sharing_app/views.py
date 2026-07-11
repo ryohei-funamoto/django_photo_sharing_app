@@ -75,3 +75,16 @@ def edit(request, id):
         'photo_sharing_app/edit.html',
         context=context,
     )
+
+@login_required
+def delete(request, id):
+    post = get_object_or_404(Post, pk=id)
+
+    if request.user == post.posted_by:
+        if request.method == 'POST':
+            post.delete()
+            return redirect('photo_sharing_app:index')
+        else:
+            return redirect('photo_sharing_app:show', id=post.id)
+    else:
+        raise PermissionDenied
