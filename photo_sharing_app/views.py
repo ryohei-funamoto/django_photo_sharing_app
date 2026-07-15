@@ -34,7 +34,10 @@ def show(request, id):
 
 @login_required
 def create(request):
-    form = PostForm(request.POST or None)
+    form = PostForm(
+        request.POST or None,
+        request.FILES or None
+    )
 
     if request.method == 'POST' and form.is_valid():
         post = form.save(commit=False)
@@ -56,11 +59,19 @@ def create(request):
 def edit(request, id):
     post = get_object_or_404(Post, pk=id)
 
-    form = PostForm(request.POST or None, instance=post)
+    old_image = post.image
+
+    form = PostForm(
+        request.POST or None,
+        request.FILES or None,
+        instance=post
+    )
 
     if post.posted_by == request.user:
         if request.method == 'POST' and form.is_valid():
-            form.save()
+            updated_post = form.save()
+            if old_image and old_image.name != 'images/noimage.png' and old_image.name != updated_post.image.name:
+                old_image.delete(save=False)
             return redirect('photo_sharing_app:show', id=post.id)
     else:
         raise PermissionDenied
@@ -82,6 +93,8 @@ def delete(request, id):
 
     if request.user == post.posted_by:
         if request.method == 'POST':
+            if post.image.name != 'images/noimage.png':
+                post.image.delete()
             post.delete()
             return redirect('photo_sharing_app:index')
         else:

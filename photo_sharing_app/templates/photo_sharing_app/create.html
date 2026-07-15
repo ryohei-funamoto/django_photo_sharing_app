@@ -2,7 +2,7 @@
 {% block title %}投稿作成ページ | {{ block.super }}{% endblock %}
 {% block content %}
     <h1>投稿作成ページ</h1>
-    <form action="{% url 'photo_sharing_app:create' %}" method="POST" novalidate>
+    <form action="{% url 'photo_sharing_app:create' %}" method="POST" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
         {% for field in form %}
             <div>
