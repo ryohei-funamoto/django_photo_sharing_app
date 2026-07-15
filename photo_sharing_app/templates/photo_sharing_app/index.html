@@ -3,11 +3,7 @@
     <div class="posts">
         {% for post in posts %}
             <a href="{% url 'photo_sharing_app:show' id=post.id %}" class="post">
-                <p>{{ post.title }}</p>
-                <p>{{ post.content | truncatechars:50 }}</p>
-                <p>投稿者: {{ post.posted_by }}</p>
-                <p><time datetime="{{ post.created_at | date:'Y-m-d' }}">投稿日: {{ post.created_at | date:'Y/m/d' }}</time></p>
-                <p><time datetime="{{ post.updated_at | date:'Y-m-d' }}">更新日: {{ post.updated_at | date:'Y/m/d' }}</time></p>
+                <div><img src="{{ post.image.url }}" alt=""></div>
             </a>
         {% empty %}
             <p>まだ投稿がありません。</p>
