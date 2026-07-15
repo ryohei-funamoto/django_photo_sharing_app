@@ -47,8 +47,9 @@ class IndexViewWithPostsTestCase(TestCase):
             response.context['posts'],
             [self.post2, self.post1]
         )
-        self.assertContains(response, 'タイトル1')
-        self.assertContains(response, 'タイトル2')
+        self.assertContains(response, f'/posts/{self.post1.id}')
+        self.assertContains(response, f'/posts/{self.post2.id}')
+        self.assertContains(response, '/media/images/noimage.png')
 
 class IndexViewWithoutPostsTestCase(TestCase):
     def test_index_displays_empty_message_when_no_posts(self):
