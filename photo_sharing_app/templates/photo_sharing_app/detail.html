@@ -2,6 +2,7 @@
 {% block title %}{{ post.title }} | {{ block.super }}{% endblock %}
 {% block content %}
     <h1>{{ post.title }}</h1>
+    <div><img src="{{ post.image.url }}" alt=""></div>
     <p>{{ post.content | linebreaksbr }}</p>
     <p>投稿者: {{ post.posted_by }}</p>
     <p><time datetime="{{ post.created_at | date:'Y-m-d' }}">投稿日: {{ post.created_at | date:'Y/m/d' }}</time></p>
