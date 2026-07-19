@@ -1,9 +1,9 @@
 {% extends 'photo_sharing_app/layouts/base.html' %}
 {% block content %}
-    <div class="posts">
+    <div class="posts row g-2 mb-3">
         {% for post in posts %}
-            <a href="{% url 'photo_sharing_app:show' id=post.id %}" class="post">
-                <div><img src="{{ post.image.url }}" alt=""></div>
+            <a href="{% url 'photo_sharing_app:show' id=post.id %}" class="post col-6 col-md-4 d-block">
+                <div class="ratio ratio-1x1"><img src="{{ post.image.url }}" alt="" class="mw-100 object-fit-cover rounded"></div>
             </a>
         {% empty %}
             <p>まだ投稿がありません。</p>
