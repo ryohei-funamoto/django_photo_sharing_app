@@ -1,10 +1,11 @@
 {% extends 'photo_sharing_app/layouts/base.html' %}
 {% block content %}
     <div class="posts row g-2 mb-3">
-        {% for post in posts %}
+        {% for post in page_obj %}
             {% include 'photo_sharing_app/components/post.html' %}
         {% empty %}
             <p>まだ投稿がありません。</p>
         {% endfor %}
     </div>
+    {% include 'photo_sharing_app/components/pagination.html' %}
 {% endblock %}
