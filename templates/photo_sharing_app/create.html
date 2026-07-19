@@ -1,23 +1,10 @@
 {% extends 'photo_sharing_app/layouts/base.html' %}
-{% load widget_tweaks %}
 {% block title %}投稿作成ページ | {{ block.super }}{% endblock %}
 {% block content %}
     <h1>投稿作成ページ</h1>
     <form action="{% url 'photo_sharing_app:create' %}" method="POST" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
-        {% for field in form %}
-            <div class="mt-3">
-                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                {% if field.errors %}
-                    {{ field | add_class:"form-control is-invalid" }}
-                    {% for error in field.errors %}
-                        <div class="invalid-feedback">{{ error }}</div>
-                    {% endfor %}
-                {% else %}
-                    {{ field | add_class:"form-control" }}
-                {% endif %}
-            </div>
-        {% endfor %}
+        {% include 'photo_sharing_app/components/form.html' %}
         <div class="text-center mt-3">
             <button type="submit" class="btn btn-success">投稿する</button>
         </div>
