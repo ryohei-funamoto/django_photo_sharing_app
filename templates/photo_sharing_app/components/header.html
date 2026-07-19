@@ -1,0 +1,29 @@
+<header class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+        {% if request.resolver_match.url_name == 'index' %}
+            <h1 class="m-0">Photo Sharing App</h1>
+        {% else %}
+            <p class="fs-2 fw-bold m-0"><a href="{% url 'photo_sharing_app:index' %}" class="text-dark text-decoration-none">Photo Sharing App</a></p>
+        {% endif %}
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
+                {% if request.user.is_authenticated %}
+                    <li class="nav-item">ようこそ、 {{ request.user }} さん</li>
+                    <li class="nav-item ms-lg-3"><a href="{% url 'photo_sharing_app:create' %}" class="nav-link">投稿する</a></li>
+                    <li class="nav-item ms-lg-3">
+                        <form action="{% url 'photo_sharing_app:logout' %}" method="POST">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-dark">ログアウトする</button>
+                        </form>
+                    </li>
+                {% elif request.resolver_match.url_name == 'login' %}
+                {% else %}
+                    <li class="nav-item"><a href="{% url 'photo_sharing_app:login' %}?next={{ request.get_full_path | urlencode  }}" class="btn btn-primary">ログインする</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</header>
