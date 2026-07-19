@@ -2,9 +2,7 @@
 {% block content %}
     <div class="posts row g-2 mb-3">
         {% for post in posts %}
-            <a href="{% url 'photo_sharing_app:show' id=post.id %}" class="post col-6 col-md-4 d-block">
-                <div class="ratio ratio-1x1"><img src="{{ post.image.url }}" alt="" class="mw-100 object-fit-cover rounded"></div>
-            </a>
+            {% include 'photo_sharing_app/components/post.html' %}
         {% empty %}
             <p>まだ投稿がありません。</p>
         {% endfor %}
